@@ -1,0 +1,222 @@
+{
+  "valid_products": [
+    {
+      "name": "iPhone 15 Pro",
+      "description": "Latest iPhone with A17 Pro chip, titanium design, and advanced camera system",
+      "price": 999.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/iphone15pro.jpg",
+      "stock": 50
+    },
+    {
+      "name": "Samsung Galaxy S24",
+      "description": "Android flagship with AI features and excellent camera performance",
+      "price": 899.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/galaxys24.jpg",
+      "stock": 35
+    },
+    {
+      "name": "MacBook Air M3",
+      "description": "Lightweight laptop with Apple M3 chip, perfect for productivity",
+      "price": 1199.99,
+      "category": "Computers",
+      "image": "https://example.com/images/macbook-air-m3.jpg",
+      "stock": 25
+    },
+    {
+      "name": "Nike Air Max 270",
+      "description": "Comfortable running shoes with Air Max technology",
+      "price": 129.99,
+      "category": "Footwear",
+      "image": "https://example.com/images/nike-airmax-270.jpg",
+      "stock": 100
+    },
+    {
+      "name": "Coffee Maker Deluxe",
+      "description": "Programmable coffee maker with 12-cup capacity",
+      "price": 79.99,
+      "category": "Home & Kitchen",
+      "image": "https://example.com/images/coffee-maker.jpg",
+      "stock": 15
+    },
+    {
+      "name": "Wireless Bluetooth Headphones",
+      "description": "Noise-cancelling headphones with 30-hour battery life",
+      "price": 199.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/bluetooth-headphones.jpg",
+      "stock": 75
+    },
+    {
+      "name": "Yoga Mat Premium",
+      "description": "Non-slip yoga mat made from eco-friendly materials",
+      "price": 29.99,
+      "category": "Sports & Fitness",
+      "image": "https://example.com/images/yoga-mat.jpg",
+      "stock": 200
+    },
+    {
+      "name": "Smart Watch Series 8",
+      "description": "Health monitoring smartwatch with GPS and cellular connectivity",
+      "price": 399.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/smartwatch.jpg",
+      "stock": 30
+    }
+  ],
+  "minimal_valid_products": [
+    {
+      "name": "Basic Product",
+      "price": 10.00,
+      "stock": 1
+    },
+    {
+      "name": "Another Product",
+      "price": 0.01,
+      "stock": 0
+    }
+  ],
+  "products_with_optional_fields": [
+    {
+      "name": "Product with Description",
+      "description": "This product has a description but no category or image",
+      "price": 25.50,
+      "stock": 10
+    },
+    {
+      "name": "Product with Category",
+      "price": 45.00,
+      "category": "Test Category",
+      "stock": 5
+    },
+    {
+      "name": "Product with Image",
+      "price": 15.99,
+      "image": "https://example.com/test-image.jpg",
+      "stock": 20
+    }
+  ],
+  "edge_case_products": [
+    {
+      "name": "Very Long Product Name That Exceeds Normal Length Expectations",
+      "description": "A product with an extremely long name to test string handling",
+      "price": 999999.99,
+      "category": "Test Category",
+      "image": "https://example.com/very-long-image-url-that-might-cause-issues.jpg",
+      "stock": 999999
+    },
+    {
+      "name": "Product with Special Characters: !@#$%^&*()",
+      "description": "Description with special characters: áéíóú ñ ü ß",
+      "price": 0.01,
+      "category": "Special & Characters",
+      "image": "https://example.com/special-chars.jpg",
+      "stock": 1
+    },
+    {
+      "name": "Product with Numbers 123",
+      "description": "Description with numbers 456 and symbols @#$",
+      "price": 123.45,
+      "category": "Category 789",
+      "image": "https://example.com/numbers123.jpg",
+      "stock": 123
+    }
+  ],
+  "invalid_products": [
+    {
+      "description": "Missing name and price",
+      "category": "Electronics",
+      "stock": 10
+    },
+    {
+      "name": "Missing Price",
+      "description": "Product without price field",
+      "category": "Electronics",
+      "stock": 10
+    },
+    {
+      "name": "Missing Stock",
+      "description": "Product without stock field",
+      "price": 50.00,
+      "category": "Electronics"
+    },
+    {
+      "name": "",
+      "description": "Empty name",
+      "price": 50.00,
+      "stock": 10
+    },
+    {
+      "name": "Negative Price",
+      "description": "Product with negative price",
+      "price": -10.00,
+      "stock": 10
+    },
+    {
+      "name": "Negative Stock",
+      "description": "Product with negative stock",
+      "price": 50.00,
+      "stock": -5
+    },
+    {
+      "name": "Invalid Price Type",
+      "description": "Price as string instead of number",
+      "price": "fifty dollars",
+      "stock": 10
+    },
+    {
+      "name": "Invalid Stock Type",
+      "description": "Stock as string instead of number",
+      "price": 50.00,
+      "stock": "ten"
+    }
+  ],
+  "update_test_data": [
+    {
+      "name": "Updated Product Name",
+      "description": "Updated description",
+      "price": 75.00,
+      "category": "Updated Category",
+      "image": "https://example.com/updated-image.jpg",
+      "stock": 25
+    },
+    {
+      "name": "Partial Update - Name Only"
+    },
+    {
+      "price": 99.99,
+      "stock": 50
+    },
+    {
+      "description": "Only description updated",
+      "category": "Only category updated"
+    }
+  ],
+  "bulk_insert_data": [
+    {
+      "name": "Bulk Product 1",
+      "description": "First bulk product",
+      "price": 10.00,
+      "category": "Bulk Category",
+      "image": "https://example.com/bulk1.jpg",
+      "stock": 100
+    },
+    {
+      "name": "Bulk Product 2",
+      "description": "Second bulk product",
+      "price": 20.00,
+      "category": "Bulk Category",
+      "image": "https://example.com/bulk2.jpg",
+      "stock": 100
+    },
+    {
+      "name": "Bulk Product 3",
+      "description": "Third bulk product",
+      "price": 30.00,
+      "category": "Bulk Category",
+      "image": "https://example.com/bulk3.jpg",
+      "stock": 100
+    }
+  ]
+} 

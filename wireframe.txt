@@ -1,0 +1,540 @@
+Detailed E-commerce Store Wireframe Design with React.js
+1. Project Overview
+This e-commerce store allows users to browse products, view details, add items to a shopping cart, register/login, and place orders. The frontend is built with React.js for a dynamic and responsive UI, using Tailwind CSS for styling. The backend uses Express.js, with MongoDB as the database.
+2. Detailed Wireframe Design
+Below is a detailed wireframe for each page/component, including layout, elements, and React-specific considerations.
+2.1 Home Page (Home.js)
+
+Purpose: Entry point showcasing featured products and navigation.
+Layout:
+Header (Reusable Navbar component):
+Logo (left): Clickable, redirects to /.
+Navigation links (center): Home, Products, Cart, User Profile/Login.
+Search icon (right): Opens a search modal.
+Responsive: Hamburger menu for mobile (<768px).
+
+
+Hero Section:
+Full-width banner with a background image, headline ("Shop the Latest Trends"), and a "Shop Now" button.
+React Component: HeroBanner with a carousel for multiple banners.
+
+
+Featured Products:
+Grid layout (3 columns desktop, 2 tablet, 1 mobile).
+Product cards (ProductCard component): Image, name, price, rating (stars), "Add to Cart" button.
+Lazy-loaded images using react-lazy-load.
+
+
+Footer (Reusable Footer component):
+Links: About, Contact, Terms, Privacy.
+Social media icons.
+Copyright text.
+
+
+
+
+React Considerations:
+Use useState for search modal visibility.
+Fetch featured products with useEffect and display using map for the grid.
+Tailwind classes: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.
+
+
+
+2.2 Product Listing Page (Products.js)
+
+Purpose: Display all products with filtering and pagination.
+Layout:
+Sidebar (FilterSidebar component):
+Filters: Category (checkboxes), Price Range (slider), Rating (star selector).
+"Apply Filters" and "Clear Filters" buttons.
+Collapsible on mobile (toggle with button).
+
+
+Main Content:
+Product grid (ProductGrid component): Same as featured products (image, name, price, rating, "View Details" button).
+Pagination (Pagination component): Previous/Next buttons, page numbers.
+
+
+Header/Footer: Reused from Navbar and Footer components.
+
+
+React Considerations:
+Use useState for filter state (category, price, rating).
+Use useEffect to fetch products based on filters and page number.
+Debounce filter inputs with useDebounce (custom hook) to prevent excessive API calls.
+Tailwind classes: flex flex-col md:flex-row, sticky top-0 for sidebar.
+
+
+
+2.3 Product Details Page (ProductDetails.js)
+
+Purpose: Show detailed product information and allow adding to cart.
+Layout:
+Main Content:
+Left: Product image gallery (ImageGallery component) with main image and thumbnails.
+Right: Product name, price, rating, description, category, stock status, quantity selector (QuantitySelector component), "Add to Cart" button.
+
+
+Related Products:
+Carousel (RelatedProducts component): Horizontal scrollable product cards.
+
+
+Header/Footer: Reused components.
+
+
+React Considerations:
+Use useParams from react-router-dom to get product ID.
+Fetch product details with useEffect.
+Use useState for quantity selection and image gallery state.
+Tailwind classes: grid grid-cols-1 md:grid-cols-2, carousel for related products.
+
+
+
+2.4 Shopping Cart Page (Cart.js)
+
+Purpose: Display cart items, update quantities, and proceed to checkout.
+Layout:
+Main Content:
+List of cart items (CartItem component): Image, name, price, quantity selector, "Remove" button.
+Order summary: Subtotal, shipping estimate, total.
+"Proceed to Checkout" button.
+Empty cart message with "Continue Shopping" button if no items.
+
+
+Header/Footer: Reused components.
+
+
+React Considerations:
+Use useContext for global cart state management (CartContext).
+Update cart with useState and sync with backend via API.
+Tailwind classes: border-b for cart items, sticky bottom-0 for order summary on mobile.
+
+
+
+2.5 Checkout Page (Checkout.js)
+
+Purpose: Collect shipping and payment info to place an order.
+Layout:
+Main Content:
+Left: Form (CheckoutForm component) for shipping address (address, city, postal code, country) and payment method (radio buttons: Credit Card, PayPal).
+Right: Order summary (OrderSummary component): Cart items, total.
+"Place Order" button.
+
+
+Header/Footer: Reused components.
+
+
+React Considerations:
+Use useState for form data.
+Validate form inputs with react-hook-form.
+Disable "Place Order" button until form is valid.
+Tailwind classes: grid grid-cols-1 lg:grid-cols-2, input border rounded.
+
+
+
+2.6 User Registration/Login Page (Auth.js)
+
+Purpose: Handle user authentication.
+Layout:
+Main Content:
+Form (AuthForm component): Email, password, (name for registration).
+Toggle between login/register with tabs or links.
+Submit button ("Login" or "Register").
+Error messages for invalid inputs.
+
+
+Header/Footer: Reused components.
+
+
+React Considerations:
+Use useState for form inputs and auth mode (login/register).
+Use react-hook-form for form validation.
+Store JWT in localStorage with useContext (AuthContext).
+Tailwind classes: tabs, input border focus:ring.
+
+
+
+2.7 Order Confirmation Page (OrderConfirmation.js)
+
+Purpose: Display order details after successful checkout.
+Layout:
+Main Content:
+Order ID, order date, estimated delivery.
+Order summary: Items, quantities, prices, total.
+Shipping address and payment method.
+"Continue Shopping" button.
+
+
+Header/Footer: Reused components.
+
+
+React Considerations:
+Use useParams for order ID.
+Fetch order details with useEffect.
+Tailwind classes: border rounded p-4 for summary.
+
+
+
+3. Design Details
+3.1 Color Scheme
+
+Primary: #2E7D32 (Green for buttons, accents).
+Secondary: #F5F5F5 (Light gray for background).
+Text: #212121 (Dark gray for text).
+Error: #D32F2F (Red for alerts).
+
+3.2 Typography
+
+Font: Roboto (via Google Fonts).
+Sizes:
+Headings: 24px (h1), 20px (h2), 16px (h3).
+Body: 14px.
+Buttons: 16px, bold.
+
+
+
+3.3 Components
+
+Buttons: bg-green-600 hover:bg-green-500 text-white rounded-lg px-4 py-2.
+Cards: border shadow-sm rounded-lg hover:scale-105 transition-transform.
+Forms: input borderCOORD:0px 2px 4px with focus states.
+Navigation: sticky top-0 bg-white shadow for header.
+
+3.4 Responsive Design
+
+Mobile (<768px): Single-column layout, hamburger menu, collapsible sidebar.
+Tablet (768px-1024px): Two-column grid, simplified filters.
+Desktop (>1024px): Three-column grid, full sidebar.
+
+4. React.js Implementation Notes
+
+Routing: Use react-router-dom for client-side routing (BrowserRouter, Route, Link).
+State Management:
+useContext for cart and auth state.
+useReducer for complex cart operations (add/remove items).
+
+
+API Integration:
+Use axios for API calls to Express.js backend.
+Handle loading states with useState (e.g., isLoading).
+
+
+CDN Dependencies:
+React: https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js
+ReactDOM: https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js
+Babel: https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.6/babel.min.js
+Tailwind: https://cdn.tailwindcss.com
+
+
+Performance:
+Lazy load components with React.lazy and Suspense.
+Memoize components with React.memo for product cards.
+
+
+
+5. Backend and Database (Unchanged)
+5.1 API Endpoints
+
+Users: POST /api/users/register, POST /api/users/login.
+Products: GET /api/products, GET /api/products/:id.
+Cart: GET /api/cart, POST /api/cart/add, DELETE /api/cart/:itemId.
+Orders: POST /api/orders, GET /api/orders/:id.
+
+5.2 MongoDB Schema
+
+Users: _id, name, email, password, createdAt.
+Products: _id, name, price, image, description, category, rating, stock.
+Cart: _id, userId, items (array of productId, quantity, price), updatedAt.
+Orders: _id, userId, items, total, status, shippingAddress, paymentMethod, createdAt.
+
+6. Folder Structure
+ecommerce-store/
+├── client/
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.js
+│   │   │   ├── Footer.js
+│   │   │   ├── ProductCard.js
+│   │   │   ├── FilterSidebar.js
+│   │   │   └── ...
+│   │   ├── pages/
+│   │   │   ├── Home.js
+│   │   │   ├── Products.js
+│   │   │   ├── ProductDetails.js
+│   │   │   └── ...
+│   │   ├── context/
+│   │   │   ├── AuthContext.js
+│   │   │   └── CartContext.js
+│   │   ├── App.js
+│   │   └── index.js
+│   ├── package.json
+│   └── tailwind.config.js
+├── server/
+│   ├── config/
+│   │   └── db.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Product.js
+│   │   ├── Cart.js
+│   │   └── Order.js
+│   ├── routes/
+│   │   ├── users.js
+│   │   ├── products.js
+│   │   ├── cart.js
+│   │   └── orders.js
+│   ├── middleware/
+│   │   └── auth.js
+│   └── server.js
+├── package.json
+└── README.md
+
+7. Future Enhancements
+
+Add product search with fuzzy matching.
+Implement real-time cart updates with WebSockets.
+Add user profile page for order history.
+Integrate Stripe for payments.
+
+server/
+├── config/
+│   └── db.js
+├── models/
+│   ├── User.js
+│   ├── Product.js
+│   ├── Cart.js
+│   └── Order.js
+├── routes/
+│   ├── users.js
+│   ├── products.js
+│   ├── cart.js
+│   └── orders.js
+├── middleware/
+│   └── auth.js
+├── server.js
+└── package.json
+
+
+{
+  "valid_products": [
+    {
+      "name": "iPhone 15 Pro",
+      "description": "Latest iPhone with A17 Pro chip, titanium design, and advanced camera system",
+      "price": 999.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/iphone15pro.jpg",
+      "stock": 50
+    },
+    {
+      "name": "Samsung Galaxy S24",
+      "description": "Android flagship with AI features and excellent camera performance",
+      "price": 899.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/galaxys24.jpg",
+      "stock": 35
+    },
+    {
+      "name": "MacBook Air M3",
+      "description": "Lightweight laptop with Apple M3 chip, perfect for productivity",
+      "price": 1199.99,
+      "category": "Computers",
+      "image": "https://example.com/images/macbook-air-m3.jpg",
+      "stock": 25
+    },
+    {
+      "name": "Nike Air Max 270",
+      "description": "Comfortable running shoes with Air Max technology",
+      "price": 129.99,
+      "category": "Footwear",
+      "image": "https://example.com/images/nike-airmax-270.jpg",
+      "stock": 100
+    },
+    {
+      "name": "Coffee Maker Deluxe",
+      "description": "Programmable coffee maker with 12-cup capacity",
+      "price": 79.99,
+      "category": "Home & Kitchen",
+      "image": "https://example.com/images/coffee-maker.jpg",
+      "stock": 15
+    },
+    {
+      "name": "Wireless Bluetooth Headphones",
+      "description": "Noise-cancelling headphones with 30-hour battery life",
+      "price": 199.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/bluetooth-headphones.jpg",
+      "stock": 75
+    },
+    {
+      "name": "Yoga Mat Premium",
+      "description": "Non-slip yoga mat made from eco-friendly materials",
+      "price": 29.99,
+      "category": "Sports & Fitness",
+      "image": "https://example.com/images/yoga-mat.jpg",
+      "stock": 200
+    },
+    {
+      "name": "Smart Watch Series 8",
+      "description": "Health monitoring smartwatch with GPS and cellular connectivity",
+      "price": 399.99,
+      "category": "Electronics",
+      "image": "https://example.com/images/smartwatch.jpg",
+      "stock": 30
+    }
+  ],
+  "minimal_valid_products": [
+    {
+      "name": "Basic Product",
+      "price": 10.00,
+      "stock": 1
+    },
+    {
+      "name": "Another Product",
+      "price": 0.01,
+      "stock": 0
+    }
+  ],
+  "products_with_optional_fields": [
+    {
+      "name": "Product with Description",
+      "description": "This product has a description but no category or image",
+      "price": 25.50,
+      "stock": 10
+    },
+    {
+      "name": "Product with Category",
+      "price": 45.00,
+      "category": "Test Category",
+      "stock": 5
+    },
+    {
+      "name": "Product with Image",
+      "price": 15.99,
+      "image": "https://example.com/test-image.jpg",
+      "stock": 20
+    }
+  ],
+  "edge_case_products": [
+    {
+      "name": "Very Long Product Name That Exceeds Normal Length Expectations",
+      "description": "A product with an extremely long name to test string handling",
+      "price": 999999.99,
+      "category": "Test Category",
+      "image": "https://example.com/very-long-image-url-that-might-cause-issues.jpg",
+      "stock": 999999
+    },
+    {
+      "name": "Product with Special Characters: !@#$%^&*()",
+      "description": "Description with special characters: áéíóú ñ ü ß",
+      "price": 0.01,
+      "category": "Special & Characters",
+      "image": "https://example.com/special-chars.jpg",
+      "stock": 1
+    },
+    {
+      "name": "Product with Numbers 123",
+      "description": "Description with numbers 456 and symbols @#$",
+      "price": 123.45,
+      "category": "Category 789",
+      "image": "https://example.com/numbers123.jpg",
+      "stock": 123
+    }
+  ],
+  "invalid_products": [
+    {
+      "description": "Missing name and price",
+      "category": "Electronics",
+      "stock": 10
+    },
+    {
+      "name": "Missing Price",
+      "description": "Product without price field",
+      "category": "Electronics",
+      "stock": 10
+    },
+    {
+      "name": "Missing Stock",
+      "description": "Product without stock field",
+      "price": 50.00,
+      "category": "Electronics"
+    },
+    {
+      "name": "",
+      "description": "Empty name",
+      "price": 50.00,
+      "stock": 10
+    },
+    {
+      "name": "Negative Price",
+      "description": "Product with negative price",
+      "price": -10.00,
+      "stock": 10
+    },
+    {
+      "name": "Negative Stock",
+      "description": "Product with negative stock",
+      "price": 50.00,
+      "stock": -5
+    },
+    {
+      "name": "Invalid Price Type",
+      "description": "Price as string instead of number",
+      "price": "fifty dollars",
+      "stock": 10
+    },
+    {
+      "name": "Invalid Stock Type",
+      "description": "Stock as string instead of number",
+      "price": 50.00,
+      "stock": "ten"
+    }
+  ],
+  "update_test_data": [
+    {
+      "name": "Updated Product Name",
+      "description": "Updated description",
+      "price": 75.00,
+      "category": "Updated Category",
+      "image": "https://example.com/updated-image.jpg",
+      "stock": 25
+    },
+    {
+      "name": "Partial Update - Name Only"
+    },
+    {
+      "price": 99.99,
+      "stock": 50
+    },
+    {
+      "description": "Only description updated",
+      "category": "Only category updated"
+    }
+  ],
+  "bulk_insert_data": [
+    {
+      "name": "Bulk Product 1",
+      "description": "First bulk product",
+      "price": 10.00,
+      "category": "Bulk Category",
+      "image": "https://example.com/bulk1.jpg",
+      "stock": 100
+    },
+    {
+      "name": "Bulk Product 2",
+      "description": "Second bulk product",
+      "price": 20.00,
+      "category": "Bulk Category",
+      "image": "https://example.com/bulk2.jpg",
+      "stock": 100
+    },
+    {
+      "name": "Bulk Product 3",
+      "description": "Third bulk product",
+      "price": 30.00,
+      "category": "Bulk Category",
+      "image": "https://example.com/bulk3.jpg",
+      "stock": 100
+    }
+  ]
+}
