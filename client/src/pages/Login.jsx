@@ -14,10 +14,12 @@ import {
   FaStar
 } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
-import '../App.css';
+import { useAuth } from '../context/AuthContext';
+import './login.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -67,14 +69,19 @@ const Login = () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setErrors({});
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await login(formData.email, formData.password);
       setSubmitStatus('success');
       setTimeout(() => {
         navigate('/');
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      setErrors({ general: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSocialLogin = (provider) => {
@@ -118,25 +125,35 @@ const Login = () => {
                 </div>
               )}
 
+              {errors.general && (
+                <div className="error-alert">
+                  <FaExclamationCircle className="error-icon" />
+                  <div>
+                    <h4>Login Failed</h4>
+                    <p>{errors.general}</p>
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="modern-form" noValidate>
                 {/* Email Field */}
                 <div className="form-field-container">
+                  <label htmlFor="email" className="field-title">
+                    Email Address
+                  </label>
                   <div className="input-wrapper">
                     <div className="input-icon">
                       <FaEnvelope />
                     </div>
                     <div className="input-content">
-                      <label htmlFor="email" className="floating-label">
-                        Email Address
-                      </label>
                       <input
                         type="email"
-                        className={`floating-input ${errors.email ? 'error' : ''} ${formData.email ? 'has-value' : ''}`}
+                        className={`floating-input ${errors.email ? 'error' : ''}`}
                         id="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder=" "
+                        placeholder="Enter your email address"
                       />
                     </div>
                   </div>
@@ -149,22 +166,22 @@ const Login = () => {
 
                 {/* Password Field */}
                 <div className="form-field-container">
+                  <label htmlFor="password" className="field-title">
+                    Password
+                  </label>
                   <div className="input-wrapper">
                     <div className="input-icon">
                       <FaLock />
                     </div>
                     <div className="input-content">
-                      <label htmlFor="password" className="floating-label">
-                        Password
-                      </label>
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        className={`floating-input ${errors.password ? 'error' : ''} ${formData.password ? 'has-value' : ''}`}
+                        className={`floating-input ${errors.password ? 'error' : ''}`}
                         id="password"
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        placeholder=" "
+                        placeholder="Enter your password"
                       />
                     </div>
                     <button
@@ -262,47 +279,36 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Right Side - Visual */}
+          {/* Right Side - Image/Content */}
           <div className="col-lg-6 d-none d-lg-flex align-items-center justify-content-center p-5">
-            <div className="visual-section">
-              <div className="visual-content">
-                <div className="visual-title">
-                  <h2>Welcome Back to CodeAlpha Store</h2>
-                  <p>Your shopping journey continues here</p>
+            <div className="login-content">
+              <div className="content-wrapper">
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaShieldAlt />
+                  </div>
+                  <h3>Secure & Reliable</h3>
+                  <p>Your data is protected with industry-standard security measures</p>
                 </div>
-                <div className="visual-features">
-                  <div className="feature-item">
-                    <div className="feature-icon">
-                      <FaUser />
-                    </div>
-                    <div className="feature-text">
-                      <h4>Personalized Experience</h4>
-                      <p>Get recommendations based on your preferences</p>
-                    </div>
+
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaStar />
                   </div>
-                  <div className="feature-item">
-                    <div className="feature-icon">
-                      <FaShieldAlt />
-                    </div>
-                    <div className="feature-text">
-                      <h4>Secure Access</h4>
-                      <p>Your account is protected with advanced security</p>
-                    </div>
+                  <h3>Premium Experience</h3>
+                  <p>Enjoy a seamless shopping experience with our premium features</p>
+                </div>
+
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaUser />
                   </div>
-                  <div className="feature-item">
-                    <div className="feature-icon">
-                      <FaStar />
-                    </div>
-                    <div className="feature-text">
-                      <h4>Member Benefits</h4>
-                      <p>Enjoy exclusive perks and early access to deals</p>
-                    </div>
-                  </div>
+                  <h3>Personalized Service</h3>
+                  <p>Get personalized recommendations and support tailored to your needs</p>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

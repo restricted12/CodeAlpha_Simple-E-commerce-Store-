@@ -65,7 +65,6 @@ const Footer = () => {
               <li><Link to="/faq" className="footer-link">FAQ</Link></li>
             </ul>
           </div>
-
           {/* Account */}
           <div className="footer-section">
             <h4 className="footer-subtitle">Account</h4>

@@ -8,7 +8,7 @@ async function createCart(req, res) {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
-}
+};
 
 // Get all carts
 async function getAllCarts(req, res) {

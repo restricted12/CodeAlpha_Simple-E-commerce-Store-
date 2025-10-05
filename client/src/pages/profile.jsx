@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { authPut } from '../utils/api';
 import {
   FaUser,
   FaEnvelope,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaEdit,
+  // FaEdit,
   FaSave,
   FaTimes,
   FaShoppingBag,
@@ -21,22 +21,43 @@ import {
   FaBell,
   FaLock
 } from 'react-icons/fa';
-import '../App.css';
+import './profile.css';
 
 const Profile = () => {
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [editField, setEditField] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Sample user data
+  // Initialize user data from AuthContext only
   const [userData, setUserData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main Street, New York, NY 10001',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    avatar: user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
   });
+
+  // Update user data when user context changes
+  useEffect(() => {
+    if (user) {
+      setUserData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        avatar: user.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+      });
+    } else {
+      // Clear user data if no user is logged in
+      setUserData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+      });
+    }
+  }, [user]);
 
   // Sample orders data
   const orders = [
@@ -102,22 +123,48 @@ const Profile = () => {
   ];
 
   const handleEdit = (field) => {
+    if (!isAuthenticated) {
+      alert('Please log in to edit your profile');
+      return;
+    }
     setEditField(field);
     setIsEditing(true);
   };
 
-  const handleSave = (field, value) => {
-    setUserData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    setIsEditing(false);
-    setEditField(null);
+  const handleSave = async (field, value) => {
+    if (!isAuthenticated) {
+      alert('Please log in to save changes');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      // Update user data locally
+      const updatedUserData = { ...userData, [field]: value };
+      setUserData(updatedUserData);
+      
+      // Save to API (if you have an update profile endpoint)
+      // await authPut('/users/profile', updatedUserData);
+      
+      setIsEditing(false);
+      setEditField(null);
+    } catch (error) {
+      console.error('Error saving user data:', error);
+      // Revert changes on error
+      setUserData(prev => ({ ...prev }));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditField(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   const getStatusColor = (status) => {
@@ -133,6 +180,34 @@ const Profile = () => {
     }
   };
 
+  // If user is not authenticated, show login prompt
+  if (!isAuthenticated) {
+    return (
+      <div className="profile-page">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-md-8 col-lg-6">
+              <div className="profile-content text-center">
+                <div className="tab-header">
+                  <h2>Profile Access Required</h2>
+                  <p>Please log in to view and manage your profile</p>
+                </div>
+                <div className="mt-4">
+                  <Link to="/login" className="btn btn-primary me-3">
+                    Login
+                  </Link>
+                  <Link to="/register" className="btn btn-outline-primary">
+                    Register
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="profile-page">
       <div className="container">
@@ -144,11 +219,16 @@ const Profile = () => {
                 <div className="profile-avatar">
                   <img src={userData.avatar} alt="Profile" />
                   <button className="edit-avatar-btn">
-                    <FaEdit />
+                    {/* <FaEdit /> */}
                   </button>
                 </div>
-                <h3 className="profile-name">{userData.firstName} {userData.lastName}</h3>
-                <p className="profile-email">{userData.email}</p>
+                <h3 className="profile-name">
+                  {userData.firstName && userData.lastName 
+                    ? `${userData.firstName} ${userData.lastName}`
+                    : 'User Profile'
+                  }
+                </h3>
+                <p className="profile-email">{userData.email || 'No email provided'}</p>
               </div>
 
               <nav className="profile-nav">
@@ -185,7 +265,7 @@ const Profile = () => {
               </nav>
 
               <div className="profile-actions">
-                <button className="logout-btn">
+                <button className="logout-btn" onClick={handleLogout}>
                   <FaSignOutAlt /> Sign Out
                 </button>
               </div>
@@ -214,19 +294,25 @@ const Profile = () => {
                             type="text"
                             value={userData.firstName}
                             onChange={(e) => setUserData(prev => ({ ...prev, firstName: e.target.value }))}
+                            placeholder="Enter your first name"
                           />
-                          <button onClick={() => handleSave('firstName', userData.firstName)}>
-                            <FaSave />
+                          <button 
+                            onClick={() => handleSave('firstName', userData.firstName)}
+                            disabled={isSaving}
+                          >
+                            {isSaving ? 'Saving...' : <FaSave />}
                           </button>
-                          <button onClick={handleCancel}>
+                          <button onClick={handleCancel} disabled={isSaving}>
                             <FaTimes />
                           </button>
                         </div>
                       ) : (
                         <div className="field-display">
-                          <span>{userData.firstName}</span>
+                          <span className={userData.firstName ? 'has-data' : 'empty-field'}>
+                            {userData.firstName || 'Not provided'}
+                          </span>
                           <button onClick={() => handleEdit('firstName')}>
-                            <FaEdit />
+                            {/* <FaEdit /> */}
                           </button>
                         </div>
                       )}
@@ -242,19 +328,25 @@ const Profile = () => {
                             type="text"
                             value={userData.lastName}
                             onChange={(e) => setUserData(prev => ({ ...prev, lastName: e.target.value }))}
+                            placeholder="Enter your last name"
                           />
-                          <button onClick={() => handleSave('lastName', userData.lastName)}>
-                            <FaSave />
+                          <button 
+                            onClick={() => handleSave('lastName', userData.lastName)}
+                            disabled={isSaving}
+                          >
+                            {isSaving ? 'Saving...' : <FaSave />}
                           </button>
-                          <button onClick={handleCancel}>
+                          <button onClick={handleCancel} disabled={isSaving}>
                             <FaTimes />
                           </button>
                         </div>
                       ) : (
                         <div className="field-display">
-                          <span>{userData.lastName}</span>
+                          <span className={userData.lastName ? 'has-data' : 'empty-field'}>
+                            {userData.lastName || 'Not provided'}
+                          </span>
                           <button onClick={() => handleEdit('lastName')}>
-                            <FaEdit />
+                            {/* <FaEdit /> */}
                           </button>
                         </div>
                       )}
@@ -265,64 +357,11 @@ const Profile = () => {
                         <FaEnvelope /> Email
                       </label>
                       <div className="field-display">
-                        <span>{userData.email}</span>
-                        <span className="verified-badge">Verified</span>
+                        <span className={userData.email ? 'has-data' : 'empty-field'}>
+                          {userData.email || 'No email provided'}
+                        </span>
+                        {userData.email && <span className="verified-badge">Verified</span>}
                       </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label>
-                        <FaPhone /> Phone
-                      </label>
-                      {editField === 'phone' ? (
-                        <div className="edit-field">
-                          <input
-                            type="tel"
-                            value={userData.phone}
-                            onChange={(e) => setUserData(prev => ({ ...prev, phone: e.target.value }))}
-                          />
-                          <button onClick={() => handleSave('phone', userData.phone)}>
-                            <FaSave />
-                          </button>
-                          <button onClick={handleCancel}>
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="field-display">
-                          <span>{userData.phone}</span>
-                          <button onClick={() => handleEdit('phone')}>
-                            <FaEdit />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="form-group">
-                      <label>
-                        <FaMapMarkerAlt /> Address
-                      </label>
-                      {editField === 'address' ? (
-                        <div className="edit-field">
-                          <textarea
-                            value={userData.address}
-                            onChange={(e) => setUserData(prev => ({ ...prev, address: e.target.value }))}
-                          />
-                          <button onClick={() => handleSave('address', userData.address)}>
-                            <FaSave />
-                          </button>
-                          <button onClick={handleCancel}>
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="field-display">
-                          <span>{userData.address}</span>
-                          <button onClick={() => handleEdit('address')}>
-                            <FaEdit />
-                          </button>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

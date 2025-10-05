@@ -35,7 +35,8 @@ async function getCurrentUser(req, res) {
     // Remove password from response
     const userResponse = {
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt

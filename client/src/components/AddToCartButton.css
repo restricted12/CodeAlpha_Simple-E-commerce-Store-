@@ -1,0 +1,222 @@
+/* Add to Cart Button Styles */
+.add-to-cart-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-to-cart-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Sizes */
+.add-to-cart-btn.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-width: 120px;
+}
+
+.add-to-cart-btn.btn-medium {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  min-width: 140px;
+}
+
+.add-to-cart-btn.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  min-width: 160px;
+}
+
+/* Default State */
+.add-to-cart-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.add-to-cart-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Loading State */
+.add-to-cart-btn.loading {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  cursor: not-allowed;
+}
+
+.add-to-cart-btn.loading:hover {
+  transform: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Success State */
+.add-to-cart-btn.success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.add-to-cart-btn.success:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* In Cart State */
+.add-to-cart-btn.in-cart {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.add-to-cart-btn.in-cart:hover {
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Icon Styles */
+.add-to-cart-btn svg {
+  transition: all 0.3s ease;
+}
+
+.add-to-cart-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.add-to-cart-btn.loading svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button Text */
+.btn-text {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Ripple Effect */
+.add-to-cart-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.add-to-cart-btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .add-to-cart-btn.btn-large {
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    min-width: 140px;
+  }
+  
+  .add-to-cart-btn.btn-medium {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    min-width: 120px;
+  }
+  
+  .add-to-cart-btn.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 576px) {
+  .add-to-cart-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .add-to-cart-btn.btn-large,
+  .add-to-cart-btn.btn-medium,
+  .add-to-cart-btn.btn-small {
+    min-width: auto;
+  }
+}
+
+/* Focus States for Accessibility */
+.add-to-cart-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.add-to-cart-btn:focus:not(:focus-visible) {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .add-to-cart-btn {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  
+  .add-to-cart-btn:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  }
+}
+
+/* Animation for state changes */
+.add-to-cart-btn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success animation */
+.add-to-cart-btn.success {
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+} 

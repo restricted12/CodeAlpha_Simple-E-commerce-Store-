@@ -13,7 +13,8 @@ To test protected routes (like creating, updating, or deleting products), you ne
 curl -X POST http://localhost:5000/api/users/createaccount \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Test User",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "test@example.com",
     "password": "password123"
   }'
@@ -24,7 +25,8 @@ curl -X POST http://localhost:5000/api/users/createaccount \
 {
   "user": {
     "_id": "60f7b3b3b3b3b3b3b3b3b3b3",
-    "name": "Test User",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "test@example.com",
     "createdAt": "2023-07-20T10:30:00.000Z",
     "updatedAt": "2023-07-20T10:30:00.000Z"
@@ -52,7 +54,8 @@ curl -X POST http://localhost:5000/api/users/login \
 {
   "user": {
     "_id": "60f7b3b3b3b3b3b3b3b3b3b3",
-    "name": "Test User",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "test@example.com",
     "createdAt": "2023-07-20T10:30:00.000Z",
     "updatedAt": "2023-07-20T10:30:00.000Z"
@@ -93,7 +96,8 @@ echo "Registering user..."
 RESPONSE=$(curl -s -X POST http://localhost:5000/api/users/createaccount \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Test User",
+    "firstName": "John",
+    "lastName": "Doe",
     "email": "test@example.com",
     "password": "password123"
   }')

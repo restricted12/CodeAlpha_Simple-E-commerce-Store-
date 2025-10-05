@@ -11,96 +11,44 @@ import {
   FaSpinner,
   FaExclamationTriangle
 } from 'react-icons/fa';
-import FilterToggle from '../components/FilterToggle';
+import { useAuth } from '../context/AuthContext';
 import AddToCartButton from '../components/AddToCartButton';
-import { authGet } from '../utils/api';
-import { addToCart, getCartItemCount } from '../utils/cartUtils';
+import './products-new.css';
 
-const Products = () => {
+const ProductsNew = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceRange, setPriceRange] = useState(1000);
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState('grid');
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [cartItemCount, setCartItemCount] = useState(0);
+  
+  // Use AuthContext for product management
+  const { 
+    products, 
+    productsLoading, 
+    productsError, 
+    categories, 
+    fetchProducts, 
+    searchProducts, 
+    sortProducts 
+  } = useAuth();
 
-  // Fetch products from API
+  // Fetch products on component mount
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  // Update cart item count when component mounts and when cart changes
-  useEffect(() => {
-    setCartItemCount(getCartItemCount());
-    
-    // Listen for cart updates
-    const handleCartUpdate = () => {
-      setCartItemCount(getCartItemCount());
-    };
-    
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    window.addEventListener('storage', handleCartUpdate);
-    
-    return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate);
-      window.removeEventListener('storage', handleCartUpdate);
-    };
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch all products from the API
-      const response = await authGet('/products/get-all-products');
-      setProducts(response);
-      
-      // Extract unique categories from products
-      const uniqueCategories = [...new Set(response.map(product => product.category).filter(Boolean))];
-      setCategories([
-        { id: 'all', name: 'All Categories' },
-        ...uniqueCategories.map(category => ({ id: category.toLowerCase(), name: category }))
-      ]);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setError('Failed to load products. Please try again later.');
-    } finally {
-      setLoading(false);
+    // Only fetch if products are not already loaded
+    if (products.length === 0) {
+      fetchProducts();
     }
-  };
+  }, [fetchProducts, products.length]);
 
-  // Filter and search products
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                         (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === 'all' || 
-                           (product.category && product.category.toLowerCase() === selectedCategory);
-    const matchesPrice = product.price <= priceRange;
-    
-    return matchesSearch && matchesCategory && matchesPrice;
+  // Filter and search products using AuthContext functions
+  const filteredProducts = searchProducts(searchTerm, {
+    category: selectedCategory,
+    maxPrice: priceRange
   });
 
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'newest':
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      default:
-        return 0;
-    }
-  });
+  // Sort products using AuthContext function
+  const sortedProducts = sortProducts(filteredProducts, sortBy);
 
   const renderStars = (rating) => {
     const stars = [];
@@ -122,32 +70,12 @@ const Products = () => {
     }).format(price);
   };
 
-  const handleAddToCart = (product) => {
-    // Use the cart utility function
-    const success = addToCart(product, 1);
-    
-    if (success) {
-      // Update cart item count
-      setCartItemCount(getCartItemCount());
-      alert(`${product.name} added to cart!`);
-    } else {
-      alert('Failed to add item to cart. Please try again.');
-    }
-  };
-
   const handleAddToWishlist = (product) => {
-    // TODO: Implement add to wishlist functionality
     console.log('Add to wishlist:', product);
     alert(`${product.name} added to wishlist!`);
   };
 
-  const handleProductClick = (product) => {
-    // Store product ID in localStorage when user clicks on a product
-    localStorage.setItem('selectedProductId', product._id);
-    console.log('Product ID stored in localStorage:', product._id);
-  };
-
-  if (loading) {
+  if (productsLoading) {
     return (
       <div className="products-page">
         <div className="container">
@@ -160,14 +88,14 @@ const Products = () => {
     );
   }
 
-  if (error) {
+  if (productsError) {
     return (
       <div className="products-page">
         <div className="container">
           <div className="text-center py-5">
             <FaExclamationTriangle className="text-danger mb-3" style={{ fontSize: '3rem' }} />
             <h3>Error Loading Products</h3>
-            <p className="text-muted">{error}</p>
+            <p className="text-muted">{productsError}</p>
             <button className="btn btn-primary" onClick={fetchProducts}>
               Try Again
             </button>
@@ -310,24 +238,17 @@ const Products = () => {
                         }}
                       />
                       <div className="product-overlay">
-                        <button
-                          className="overlay-btn"
-                          onClick={() => handleAddToCart(product)}
-                          disabled={product.stock <= 0}
-                        >
-                          <FaShoppingCart />
-                        </button>
+                        <AddToCartButton 
+                          product={product} 
+                          size="small"
+                        />
                         <button
                           className="overlay-btn"
                           onClick={() => handleAddToWishlist(product)}
                         >
                           <FaHeart />
                         </button>
-                        <Link 
-                          to={`/product/${product._id}`} 
-                          className="overlay-btn"
-                          onClick={() => handleProductClick(product)}
-                        >
+                        <Link to={`/product/${product._id}`} className="overlay-btn">
                           <FaEye />
                         </Link>
                       </div>
@@ -336,20 +257,11 @@ const Products = () => {
                           Out of Stock
                         </div>
                       )}
-                      {/* Show image count if there are extra images */}
-                      {product.extraImages && product.extraImages.length > 0 && (
-                        <div className="image-count-badge">
-                          +{product.extraImages.length}
-                        </div>
-                      )}
                     </div>
                     
                     <div className="product-info">
                       <h3 className="product-name">
-                        <Link 
-                          to={`/product/${product._id}`}
-                          onClick={() => handleProductClick(product)}
-                        >
+                        <Link to={`/product/${product._id}`}>
                           {product.name}
                         </Link>
                       </h3>
@@ -357,7 +269,7 @@ const Products = () => {
                         <p className="product-category">{product.category}</p>
                       )}
                       <div className="product-rating">
-                        {renderStars(4.5)} {/* Default rating since it's not in the model */}
+                        {renderStars(4.5)}
                         <span className="rating-count">(4.5)</span>
                       </div>
                       <div className="product-price">
@@ -374,6 +286,12 @@ const Products = () => {
                       <div className="product-stock">
                         Stock: {product.stock} available
                       </div>
+                      <div className="product-actions">
+                        <AddToCartButton 
+                          product={product} 
+                          size="medium"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -386,4 +304,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default ProductsNew; 

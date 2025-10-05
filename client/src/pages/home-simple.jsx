@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import '../App.css';
 
-const Home = () => {
+const HomeSimple = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Use AuthContext for products - but don't fetch on home page load
-  const { getFeaturedProducts, products } = useAuth();
 
   const heroSlides = [
     {
@@ -20,7 +16,7 @@ const Home = () => {
       buttonLink: "/products"
     },
     {
-      title: "Electronics Deivices",
+      title: "Electronics Devices",
       subtitle: "Powerful performance meets portability",
       description: "Starting at $1,199. Free engraving available.",
       image: "https://app.dropinblog.com/uploaded/blogs/34241141/files/Electronics.png",
@@ -34,25 +30,8 @@ const Home = () => {
       image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop",
       buttonText: "Explore Collection",
       buttonLink: "/products"
-    },
-    {
-      title: "Smart Home Essentials",
-      subtitle: "Control your home with ease",
-      description: "Save on smart lights, speakers, and more.",
-      image: "https://food.unl.edu/sites/unl.edu.ianr.extension.food/files/styles/no_crop_1440/public/media/image/kitchen-tools.jpg?itok=kbPL98c1",
-      buttonText: "Upgrade Now",
-      buttonLink: "/products"
-    },
-    {
-      title: "Back to School Deals",
-      subtitle: "Everything students need to succeed",
-      description: "Discounts on laptops, bags, and accessories.",
-      image: "https://media.sd72.bc.ca/media/Default/pgg/1263/School%20Supplies-1.jpg",
-      buttonText: "Shop Deals",
-      buttonLink: "/products"
     }
   ];
-  
 
   const categories = [
     {
@@ -118,18 +97,9 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    // Simulate loading - reduced time for faster loading
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    
-    // Remove auto-slide carousel to prevent vibration
-    // const slideTimer = setInterval(() => {
-    //   setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    // }, 5000);
-
-    return () => {
-      clearTimeout(timer);
-      // clearInterval(slideTimer);
-    };
+    // Fast loading - no product fetching
+    const timer = setTimeout(() => setIsLoading(false), 300);
+    return () => clearTimeout(timer);
   }, []);
 
   const nextSlide = () => {
@@ -144,16 +114,6 @@ const Home = () => {
     setCurrentSlide(index);
   };
 
-  // Get featured products from AuthContext - only if products are already loaded
-  const featuredProducts = products.length > 0 ? getFeaturedProducts(4) : [];
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
-  };
-
   if (isLoading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -166,7 +126,7 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      {/* Hero Section with Carousel */}
+      {/* Hero Section with Static Carousel */}
       <section className="hero-section position-relative overflow-hidden">
         <div className="hero-carousel">
           {heroSlides.map((slide, index) => (
@@ -176,8 +136,7 @@ const Home = () => {
               style={{
                 backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${slide.image})`,
                 backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed'
+                backgroundPosition: 'center'
               }}
             >
               <div className="container h-100 d-flex align-items-center">
@@ -211,46 +170,6 @@ const Home = () => {
               onClick={() => goToSlide(index)}
             ></button>
           ))}
-        </div>
-      </section>
-
-      {/* Beautiful Marquee Section */}
-      <section className="marquee-section py-3 bg-gradient-primary">
-        <div className="marquee-container">
-          <div className="marquee-content">
-            <div className="marquee-item">
-              <span className="marquee-icon">🎉</span>
-              <span className="marquee-text">Free Shipping on Orders Over $50!</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">⚡</span>
-              <span className="marquee-text">Flash Sale: Up to 70% Off Electronics!</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">🛡️</span>
-              <span className="marquee-text">Secure Payment & Easy Returns</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">📱</span>
-              <span className="marquee-text">New Arrivals Every Week!</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">💎</span>
-              <span className="marquee-text">Premium Quality Products</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">🚚</span>
-              <span className="marquee-text">Same Day Delivery Available</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">⭐</span>
-              <span className="marquee-text">5-Star Customer Reviews</span>
-            </div>
-            <div className="marquee-item">
-              <span className="marquee-icon">🎁</span>
-              <span className="marquee-text">Special Offers for New Customers</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -288,7 +207,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Simple Featured Products Section */}
       <section className="py-5">
         <div className="container">
           <div className="text-center mb-5">
@@ -296,77 +215,36 @@ const Home = () => {
             <p className="lead text-muted">Handpicked products you'll love</p>
           </div>
           <div className="row g-4">
-            {featuredProducts.length > 0 ? (
-              featuredProducts.map((product) => (
-                <div key={product._id} className="col-md-6 col-lg-3">
-                  <div className="card product-card h-100 border-0 shadow-sm">
-                    <div className="position-relative">
-                      <img
-                        src={product.image || 'https://via.placeholder.com/300x300?text=No+Image'}
-                        className="card-img-top"
-                        alt={product.name}
-                        style={{ height: '250px', objectFit: 'cover' }}
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
-                        }}
-                      />
-                      {product.stock <= 0 && (
-                        <span className="badge position-absolute top-0 start-0 m-2 bg-danger">
-                          Out of Stock
-                        </span>
-                      )}
-                      {product.stock > 0 && product.stock < 10 && (
-                        <span className="badge position-absolute top-0 start-0 m-2 bg-warning">
-                          Low Stock
-                        </span>
-                      )}
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="col-md-6 col-lg-3">
+                <div className="card product-card h-100 border-0 shadow-sm">
+                  <div className="position-relative">
+                    <div 
+                      className="card-img-top"
+                      style={{ 
+                        height: '250px', 
+                        backgroundColor: '#f8f9fa',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <span className="text-muted">Product {index + 1}</span>
                     </div>
-                    <div className="card-body">
-                      <span className="text-muted small">{product.category || 'Uncategorized'}</span>
-                      <h5 className="card-title fw-bold mt-2">{product.name}</h5>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="h5 fw-bold text-primary">{formatPrice(product.price)}</span>
-                        <Link to={`/product/${product._id}`} className="btn btn-outline-primary btn-sm">
-                          View Details
-                        </Link>
-                      </div>
+                  </div>
+                  <div className="card-body">
+                    <span className="text-muted small">Category</span>
+                    <h5 className="card-title fw-bold mt-2">Sample Product</h5>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span className="h5 fw-bold text-primary">$99.99</span>
+                      <Link to="/products" className="btn btn-outline-primary btn-sm">
+                        View Details
+                      </Link>
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              // Show placeholder products when no real products are loaded
-              Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="col-md-6 col-lg-3">
-                  <div className="card product-card h-100 border-0 shadow-sm">
-                    <div className="position-relative">
-                      <div 
-                        className="card-img-top"
-                        style={{ 
-                          height: '250px', 
-                          backgroundColor: '#f8f9fa',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <span className="text-muted">Loading...</span>
-                      </div>
-                    </div>
-                    <div className="card-body">
-                      <span className="text-muted small">Category</span>
-                      <h5 className="card-title fw-bold mt-2">Product Name</h5>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="h5 fw-bold text-primary">$0.00</span>
-                        <button className="btn btn-outline-primary btn-sm" disabled>
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
           <div className="text-center mt-5">
             <Link to="/products" className="btn btn-primary btn-lg px-5">
@@ -477,5 +355,4 @@ const Home = () => {
   );
 };
 
-export default Home;
-
+export default HomeSimple; 

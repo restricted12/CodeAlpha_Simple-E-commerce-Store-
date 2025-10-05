@@ -19,11 +19,18 @@ const productSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  image: {
+  image: { // main image
     type: String,
     default: ''
   },
-  stock: { type: Number, required: true }
+  extraImages: { // additional images
+    type: [String],
+    default: []
+  },
+  stock: {
+    type: Number,
+    required: true
+  }
 }, {
   timestamps: true
 });

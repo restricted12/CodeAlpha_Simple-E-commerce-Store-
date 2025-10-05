@@ -15,10 +15,12 @@ import {
   FaStar
 } from 'react-icons/fa';
 import { FiArrowRight } from 'react-icons/fi';
-import '../App.css';
+import { useAuth } from '../context/AuthContext';
+import './register.css';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -99,14 +101,21 @@ const Register = () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setErrors({});
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Remove confirmPassword and agreeToTerms from the data sent to API
+      const { confirmPassword, agreeToTerms, ...registrationData } = formData;
+      await register(registrationData);
       setSubmitStatus('success');
       setTimeout(() => {
-        navigate('/login');
+        navigate('/');
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      setErrors({ general: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSocialLogin = (provider) => {
@@ -139,7 +148,17 @@ const Register = () => {
                   <FaCheckCircle className="success-icon" />
                   <div>
                     <h4>Account Created Successfully!</h4>
-                    <p>Redirecting to login page...</p>
+                    <p>Redirecting to home page...</p>
+                  </div>
+                </div>
+              )}
+
+              {errors.general && (
+                <div className="error-alert">
+                  <FaExclamationCircle className="error-icon" />
+                  <div>
+                    <h4>Registration Failed</h4>
+                    <p>{errors.general}</p>
                   </div>
                 </div>
               )}
@@ -149,22 +168,22 @@ const Register = () => {
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">
                     <div className="form-field-container">
+                      <label htmlFor="firstName" className="field-title">
+                        First Name
+                      </label>
                       <div className="input-wrapper">
                         <div className="input-icon">
                           <FaUser />
                         </div>
                         <div className="input-content">
-                          <label htmlFor="firstName" className="floating-label">
-                            First Name
-                          </label>
                           <input
                             type="text"
-                            className={`floating-input ${errors.firstName ? 'error' : ''} ${formData.firstName ? 'has-value' : ''}`}
+                            className={`floating-input ${errors.firstName ? 'error' : ''}`}
                             id="firstName"
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleInputChange}
-                            placeholder=" "
+                            placeholder="Enter your first name"
                           />
                         </div>
                       </div>
@@ -178,22 +197,22 @@ const Register = () => {
 
                   <div className="col-md-6">
                     <div className="form-field-container">
+                      <label htmlFor="lastName" className="field-title">
+                        Last Name
+                      </label>
                       <div className="input-wrapper">
                         <div className="input-icon">
                           <FaUser />
                         </div>
                         <div className="input-content">
-                          <label htmlFor="lastName" className="floating-label">
-                            Last Name
-                          </label>
                           <input
                             type="text"
-                            className={`floating-input ${errors.lastName ? 'error' : ''} ${formData.lastName ? 'has-value' : ''}`}
+                            className={`floating-input ${errors.lastName ? 'error' : ''}`}
                             id="lastName"
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleInputChange}
-                            placeholder=" "
+                            placeholder="Enter your last name"
                           />
                         </div>
                       </div>
@@ -208,22 +227,22 @@ const Register = () => {
 
                 {/* Email Field */}
                 <div className="form-field-container">
+                  <label htmlFor="email" className="field-title">
+                    Email Address
+                  </label>
                   <div className="input-wrapper">
                     <div className="input-icon">
                       <FaEnvelope />
                     </div>
                     <div className="input-content">
-                      <label htmlFor="email" className="floating-label">
-                        Email Address
-                      </label>
                       <input
                         type="email"
-                        className={`floating-input ${errors.email ? 'error' : ''} ${formData.email ? 'has-value' : ''}`}
+                        className={`floating-input ${errors.email ? 'error' : ''}`}
                         id="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder=" "
+                        placeholder="Enter your email address"
                       />
                     </div>
                   </div>
@@ -236,22 +255,22 @@ const Register = () => {
 
                 {/* Password Field */}
                 <div className="form-field-container">
+                  <label htmlFor="password" className="field-title">
+                    Password
+                  </label>
                   <div className="input-wrapper">
                     <div className="input-icon">
                       <FaLock />
                     </div>
                     <div className="input-content">
-                      <label htmlFor="password" className="floating-label">
-                        Password
-                      </label>
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        className={`floating-input ${errors.password ? 'error' : ''} ${formData.password ? 'has-value' : ''}`}
+                        className={`floating-input ${errors.password ? 'error' : ''}`}
                         id="password"
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        placeholder=" "
+                        placeholder="Enter your password"
                       />
                     </div>
                     <button
@@ -271,22 +290,22 @@ const Register = () => {
 
                 {/* Confirm Password Field */}
                 <div className="form-field-container">
+                  <label htmlFor="confirmPassword" className="field-title">
+                    Confirm Password
+                  </label>
                   <div className="input-wrapper">
                     <div className="input-icon">
                       <FaLock />
                     </div>
                     <div className="input-content">
-                      <label htmlFor="confirmPassword" className="floating-label">
-                        Confirm Password
-                      </label>
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
-                        className={`floating-input ${errors.confirmPassword ? 'error' : ''} ${formData.confirmPassword ? 'has-value' : ''}`}
+                        className={`floating-input ${errors.confirmPassword ? 'error' : ''}`}
                         id="confirmPassword"
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        placeholder=" "
+                        placeholder="Confirm your password"
                       />
                     </div>
                     <button
@@ -304,7 +323,7 @@ const Register = () => {
                   )}
                 </div>
 
-                {/* Terms Agreement */}
+                {/* Terms and Conditions */}
                 <div className="form-field-container">
                   <div className="checkbox-container">
                     <label className="custom-checkbox-wrapper">
@@ -319,9 +338,13 @@ const Register = () => {
                       <span className="checkmark"></span>
                       <span className="checkbox-text">
                         I agree to the{' '}
-                        <Link to="/terms" className="terms-link">Terms of Service</Link>
-                        {' '}and{' '}
-                        <Link to="/privacy" className="terms-link">Privacy Policy</Link>
+                        <Link to="/terms" className="terms-link">
+                          Terms and Conditions
+                        </Link>{' '}
+                        and{' '}
+                        <Link to="/privacy" className="terms-link">
+                          Privacy Policy
+                        </Link>
                       </span>
                     </label>
                   </div>
@@ -354,7 +377,7 @@ const Register = () => {
                 </div>
               </form>
 
-              {/* Social Login */}
+              {/* Social Registration */}
               <div className="social-login-section">
                 <div className="divider">
                   <span>or sign up with</span>
@@ -376,10 +399,10 @@ const Register = () => {
               </div>
 
               {/* Login Link */}
-              <div className="register-link-section text-center mt-4">
+              <div className="login-link-section text-center mt-4">
                 <p>
                   Already have an account?{' '}
-                  <Link to="/login" className="register-link">
+                  <Link to="/login" className="login-link">
                     Sign in here
                   </Link>
                 </p>
@@ -387,47 +410,36 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Right Side - Visual */}
+          {/* Right Side - Content */}
           <div className="col-lg-6 d-none d-lg-flex align-items-center justify-content-center p-5">
-            <div className="visual-section">
-              <div className="visual-content">
-                <div className="visual-title">
-                  <h2>Join CodeAlpha Store Today</h2>
-                  <p>Start your shopping journey with us</p>
+            <div className="register-content">
+              <div className="content-wrapper">
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaGift />
+                  </div>
+                  <h3>Welcome Bonus</h3>
+                  <p>Get exclusive discounts and offers when you join our community</p>
                 </div>
-                <div className="visual-features">
-                  <div className="feature-item">
-                    <div className="feature-icon">
-                      <FaGift />
-                    </div>
-                    <div className="feature-text">
-                      <h4>Welcome Bonus</h4>
-                      <p>Get exclusive discounts on your first purchase</p>
-                    </div>
+
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaShieldAlt />
                   </div>
-                  <div className="feature-item">
-                    <div className="feature-icon">
-                      <FaShieldAlt />
-                    </div>
-                    <div className="feature-text">
-                      <h4>Secure Registration</h4>
-                      <p>Your data is protected with industry-standard security</p>
-                    </div>
+                  <h3>Secure Shopping</h3>
+                  <p>Your personal information is protected with bank-level security</p>
+                </div>
+
+                <div className="feature-card">
+                  <div className="feature-icon">
+                    <FaStar />
                   </div>
-                  <div className="feature-item">
-                    <div className="feature-icon">
-                      <FaStar />
-                    </div>
-                    <div className="feature-text">
-                      <h4>Member Rewards</h4>
-                      <p>Earn points and unlock special member benefits</p>
-                    </div>
-                  </div>
+                  <h3>Premium Support</h3>
+                  <p>Get priority customer support and personalized assistance</p>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -17,7 +17,8 @@ async function createUser(data) {
   // Return user data (without password) and token
   const userResponse = {
     _id: savedUser._id,
-    name: savedUser.name,
+    firstName: savedUser.firstName,
+    lastName: savedUser.lastName,
     email: savedUser.email,
     createdAt: savedUser.createdAt,
     updatedAt: savedUser.updatedAt
@@ -51,7 +52,8 @@ async function loginUser(email, password) {
   // Return user data (without password) and token
   const userResponse = {
     _id: user._id,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt

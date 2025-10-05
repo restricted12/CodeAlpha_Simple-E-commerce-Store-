@@ -1,0 +1,103 @@
+.filter-toggle-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  background: white;
+}
+
+.filter-toggle-header {
+  width: 100%;
+  padding: 1rem;
+  background: #f9fafb;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-toggle-header:hover {
+  background: #f3f4f6;
+}
+
+.filter-toggle-header:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.filter-toggle-title {
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-toggle-icon {
+  color: #6b7280;
+  transition: transform 0.3s ease;
+}
+
+.filter-toggle-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 1rem;
+}
+
+.filter-toggle-content.open {
+  max-height: 500px;
+  padding: 1rem;
+}
+
+/* Desktop styles - always show content */
+@media (min-width: 768px) {
+  .filter-toggle-container {
+    border: none;
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-toggle-header {
+    background: transparent;
+    padding: 0;
+    cursor: default;
+    margin-bottom: 0.75rem;
+  }
+  
+  .filter-toggle-header:hover {
+    background: transparent;
+  }
+  
+  .filter-toggle-icon {
+    display: none;
+  }
+  
+  .filter-toggle-content {
+    max-height: none;
+    padding: 0;
+    overflow: visible;
+  }
+  
+  .filter-toggle-content.open {
+    max-height: none;
+    padding: 0;
+  }
+}
+
+/* Mobile specific styles */
+@media (max-width: 767px) {
+  .filter-toggle-container {
+    margin-bottom: 0.75rem;
+  }
+  
+  .filter-toggle-header {
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .filter-toggle-content.open {
+    padding: 0.875rem 1rem;
+  }
+} 
