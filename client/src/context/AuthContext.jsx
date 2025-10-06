@@ -259,11 +259,16 @@ export const AuthProvider = ({ children }) => {
     try {
       setOrdersLoading(true);
       setOrdersError(null);
-      
-      // Fetch orders for the current user
-      const response = await authGet(`/orders/get-orders-byuser/user/${user._id}`);
+
+      // Admins/moderators should see all orders; regular users see only their orders
+      const isAdminUser = user?.role === 'admin' || user?.role === 'moderator';
+      const endpoint = isAdminUser
+        ? '/orders/all-orders'
+        : `/orders/get-orders-byuser/user/${user._id}`;
+
+      const response = await authGet(endpoint);
       setOrders(response);
-      
+
       return response;
     } catch (err) {
       console.error('Error fetching orders:', err);

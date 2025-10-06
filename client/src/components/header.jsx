@@ -130,9 +130,15 @@ const Header = () => {
                 <FiUser className="user-icon" />
                 <span className="user-name">{user?.firstName || 'User'}</span>
               </Link>
-              <Link to="/orders" className="orders-link">
+              <Link to="/orders" className="user-link">
                 Orders
               </Link>
+              {/* Admin Link - Show only for admin users */}
+              {(user?.role === 'admin' || user?.role === 'moderator') && (
+                <Link to="/admin" className="admin-link">
+                  Admin
+                </Link>
+              )}
               <button onClick={handleLogout} className="logout-btn">
                 <FiLogOut className="logout-icon" />
                 Logout
@@ -233,6 +239,11 @@ const Header = () => {
                 <Link to="/orders" className="mobile-user-link" onClick={closeMobileMenu}>
                   Orders
                 </Link>
+                {(user?.role === 'admin' || user?.role === 'moderator') && (
+                  <Link to="/admin" className="mobile-user-link" onClick={closeMobileMenu}>
+                    Admin
+                  </Link>
+                )}
                 <button onClick={handleLogout} className="mobile-logout-btn">
                   <FiLogOut />
                   Logout

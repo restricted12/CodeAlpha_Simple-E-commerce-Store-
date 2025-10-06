@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../App.css';
@@ -6,6 +6,8 @@ import '../App.css';
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const slideIntervalRef = useRef(null);
   
   // Use AuthContext for products - but don't fetch on home page load
   const { getFeaturedProducts, products } = useAuth();
@@ -121,16 +123,44 @@ const Home = () => {
     // Simulate loading - reduced time for faster loading
     const timer = setTimeout(() => setIsLoading(false), 500);
     
-    // Remove auto-slide carousel to prevent vibration
-    // const slideTimer = setInterval(() => {
-    //   setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    // }, 5000);
-
     return () => {
       clearTimeout(timer);
-      // clearInterval(slideTimer);
     };
   }, []);
+
+  // Auto-slide effect
+  useEffect(() => {
+    if (isLoading) return; // Don't start auto-slide until loading is done
+    
+    // Clear any existing interval
+    if (slideIntervalRef.current) {
+      clearInterval(slideIntervalRef.current);
+    }
+    
+    // Start new interval
+    slideIntervalRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => {
+      if (slideIntervalRef.current) {
+        clearInterval(slideIntervalRef.current);
+      }
+    };
+  }, [isLoading]);
+
+  // Pause/resume effect
+  useEffect(() => {
+    if (slideIntervalRef.current) {
+      if (isPaused) {
+        clearInterval(slideIntervalRef.current);
+      } else {
+        slideIntervalRef.current = setInterval(() => {
+          setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+        }, 5000);
+      }
+    }
+  }, [isPaused]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -167,7 +197,11 @@ const Home = () => {
   return (
     <div className="home-page">
       {/* Hero Section with Carousel */}
-      <section className="hero-section position-relative overflow-hidden">
+      <section 
+        className="hero-section position-relative overflow-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         <div className="hero-carousel">
           {heroSlides.map((slide, index) => (
             <div

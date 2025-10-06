@@ -3,7 +3,13 @@ const orderService = require('../services/orders.service');
 // Create a new order
 async function createOrder(req, res) {
   try {
-    const order = await orderService.createOrder(req.body);
+    // Add user ID if authenticated
+    const orderData = {
+      ...req.body,
+      user: req.user?.userId || null
+    };
+    
+    const order = await orderService.createOrder(orderData);
     res.status(201).json(order);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -52,6 +58,50 @@ async function updateOrder(req, res) {
   }
 }
 
+// Update order status
+async function updateOrderStatus(req, res) {
+  try {
+    const { status, note } = req.body;
+    const order = await orderService.updateOrderStatus(req.params.id, status, note);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json(order);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+// Add tracking information
+async function addTrackingInfo(req, res) {
+  try {
+    const { trackingNumber, carrier } = req.body;
+    const order = await orderService.addTrackingInfo(req.params.id, trackingNumber, carrier);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json(order);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+// Get orders by status
+async function getOrdersByStatus(req, res) {
+  try {
+    const orders = await orderService.getOrdersByStatus(req.params.status);
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// Get order statistics
+async function getOrderStats(req, res) {
+  try {
+    const stats = await orderService.getOrderStats();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 // Delete an order by ID
 async function deleteOrder(req, res) {
   try {
@@ -69,5 +119,9 @@ module.exports = {
   getOrderById,
   getOrdersByUserId,
   updateOrder,
+  updateOrderStatus,
+  addTrackingInfo,
+  getOrdersByStatus,
+  getOrderStats,
   deleteOrder
 };

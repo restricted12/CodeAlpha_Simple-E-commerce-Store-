@@ -20,6 +20,8 @@ async function createUser(data) {
     firstName: savedUser.firstName,
     lastName: savedUser.lastName,
     email: savedUser.email,
+    role: savedUser.role,
+    isActive: savedUser.isActive,
     createdAt: savedUser.createdAt,
     updatedAt: savedUser.updatedAt
   };
@@ -55,6 +57,8 @@ async function loginUser(email, password) {
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
+    role: user.role,
+    isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
   };

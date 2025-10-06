@@ -1,101 +1,93 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import {
-  FaShoppingBag,
-  FaClock,
+  FaEye,
   FaTruck,
   FaCheckCircle,
+  FaClock,
   FaTimesCircle,
-  FaEye,
-  FaCalendarAlt,
-  FaDollarSign,
   FaBox,
-  FaUser,
+  FaSpinner,
   FaArrowLeft,
-  FaFilter,
-  FaSort,
-  FaRefresh
+  FaSearch,
+  FaFilter
 } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 import './orders.css';
 
 const Orders = () => {
-  const { 
-    user, 
-    isAuthenticated, 
-    orders, 
-    ordersLoading, 
-    ordersError, 
-    getOrderStatistics, 
-    sortOrders, 
-    filterOrders, 
-    refreshOrders 
-  } = useAuth();
-  
   const navigate = useNavigate();
-  const [filteredOrders, setFilteredOrders] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const { user, isAuthenticated, orders, fetchOrders, loading: ordersLoading } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
+  // Order status configuration
+  const orderStatuses = {
+    pending: {
+      label: 'Pending',
+      icon: FaClock,
+      color: '#ffc107',
+      bgColor: '#fff3cd'
+    },
+    confirmed: {
+      label: 'Confirmed',
+      icon: FaCheckCircle,
+      color: '#17a2b8',
+      bgColor: '#d1ecf1'
+    },
+    processing: {
+      label: 'Processing',
+      icon: FaBox,
+      color: '#007bff',
+      bgColor: '#cce7ff'
+    },
+    shipped: {
+      label: 'Shipped',
+      icon: FaTruck,
+      color: '#28a745',
+      bgColor: '#d4edda'
+    },
+    delivered: {
+      label: 'Delivered',
+      icon: FaCheckCircle,
+      color: '#28a745',
+      bgColor: '#d4edda'
+    },
+    cancelled: {
+      label: 'Cancelled',
+      icon: FaTimesCircle,
+      color: '#dc3545',
+      bgColor: '#f8d7da'
+    }
+  };
+
+  // Load orders when component mounts
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchOrders();
+    }
+  }, [isAuthenticated, user, fetchOrders]);
+
+  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
-      return;
+      navigate('/login', { state: { from: '/orders' } });
     }
   }, [isAuthenticated, navigate]);
 
-  useEffect(() => {
-    // Filter and sort orders when orders or filters change
-    let filtered = filterOrders(orders, { status: statusFilter });
-    filtered = sortOrders(filtered, sortBy);
-    setFilteredOrders(filtered);
-  }, [orders, statusFilter, sortBy, filterOrders, sortOrders]);
-
   const getStatusIcon = (status) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return <FaClock className="status-icon pending" />;
-      case 'processing':
-        return <FaBox className="status-icon processing" />;
-      case 'shipped':
-        return <FaTruck className="status-icon shipped" />;
-      case 'delivered':
-        return <FaCheckCircle className="status-icon delivered" />;
-      case 'cancelled':
-        return <FaTimesCircle className="status-icon cancelled" />;
-      default:
-        return <FaClock className="status-icon" />;
-    }
+    const statusConfig = orderStatuses[status] || orderStatuses.pending;
+    const IconComponent = statusConfig.icon;
+    return <IconComponent style={{ color: statusConfig.color }} />;
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'pending';
-      case 'processing':
-        return 'processing';
-      case 'shipped':
-        return 'shipped';
-      case 'delivered':
-        return 'delivered';
-      case 'cancelled':
-        return 'cancelled';
-      default:
-        return 'pending';
-    }
+    return orderStatuses[status]?.color || '#6c757d';
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const getStatusBgColor = (status) => {
+    return orderStatuses[status]?.bgColor || '#f8f9fa';
   };
 
   const formatPrice = (price) => {
@@ -105,352 +97,244 @@ const Orders = () => {
     }).format(price);
   };
 
-  const handleViewOrder = (order) => {
-    setSelectedOrder(order);
-    setShowOrderDetails(true);
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
-  const handleCloseOrderDetails = () => {
-    setShowOrderDetails(false);
-    setSelectedOrder(null);
-  };
+  // Filter and sort orders
+  const filteredOrders = orders
+    .filter(order => {
+      const matchesSearch = order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           order.items?.some(item => 
+                             item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                           );
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        case 'oldest':
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        case 'total_high':
+          return b.total - a.total;
+        case 'total_low':
+          return a.total - b.total;
+        default:
+          return 0;
+      }
+    });
 
-  const handleRefresh = () => {
-    refreshOrders();
-  };
-
-  const getOrderStats = () => {
-    return getOrderStatistics();
+  const getTotalItems = (order) => {
+    return order.items?.reduce((total, item) => total + item.quantity, 0) || 0;
   };
 
   if (!isAuthenticated) {
     return (
       <div className="orders-page">
         <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-md-8 col-lg-6">
-              <div className="orders-content text-center">
-                <div className="orders-header">
-                  <h2>My Orders</h2>
-                  <p>Please log in to view your order history</p>
-                </div>
-                <div className="mt-4">
-                  <Link to="/login" className="btn btn-primary me-3">
-                    Login
-                  </Link>
-                  <Link to="/register" className="btn btn-outline-primary">
-                    Register
-                  </Link>
-                </div>
-              </div>
-            </div>
+          <div className="not-authenticated">
+            <h1>Please log in to view your orders</h1>
+            <p>You need to be logged in to access your order history.</p>
+            <Link to="/login" className="btn btn-primary">
+              Login
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  const orderStats = getOrderStats();
-
   return (
     <div className="orders-page">
       <div className="container">
         {/* Header */}
         <div className="orders-header">
-          <div className="d-flex align-items-center justify-content-between mb-4">
-            <div className="d-flex align-items-center">
-              <Link to="/profile" className="btn btn-outline-secondary me-3">
-                <FaArrowLeft /> Back to Profile
-              </Link>
-              <div>
-                <h1 className="mb-1">My Orders</h1>
-                <p className="text-muted mb-0">Track your order history and status</p>
-              </div>
-            </div>
-            <button 
-              className="btn btn-outline-primary"
-              onClick={handleRefresh}
-              disabled={ordersLoading}
-            >
-              <FaRefresh className={ordersLoading ? 'fa-spin' : ''} /> Refresh
-            </button>
+          <button 
+            className="btn btn-outline-secondary mb-3"
+            onClick={() => navigate(-1)}
+          >
+            <FaArrowLeft /> Back
+          </button>
+          <h1>My Orders</h1>
+          <p>Track and manage your orders</p>
+        </div>
+
+        {/* Filters and Search */}
+        <div className="orders-filters">
+          <div className="search-box">
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search orders or products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
           </div>
 
-          {/* Order Statistics */}
-          {!ordersLoading && !ordersError && orders.length > 0 && (
-            <div className="order-stats mb-4">
-              <div className="row">
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="stat-card">
-                    <div className="stat-number">{orderStats.total}</div>
-                    <div className="stat-label">Total Orders</div>
-                  </div>
-                </div>
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="stat-card">
-                    <div className="stat-number">{orderStats.pending}</div>
-                    <div className="stat-label">Pending</div>
-                  </div>
-                </div>
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="stat-card">
-                    <div className="stat-number">{orderStats.processing}</div>
-                    <div className="stat-label">Processing</div>
-                  </div>
-                </div>
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="stat-card">
-                    <div className="stat-number">{orderStats.shipped}</div>
-                    <div className="stat-label">Shipped</div>
-                  </div>
-                </div>
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="stat-card">
-                    <div className="stat-number">{orderStats.delivered}</div>
-                    <div className="stat-label">Delivered</div>
-                  </div>
-                </div>
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="stat-card">
-                    <div className="stat-number">{orderStats.cancelled}</div>
-                    <div className="stat-label">Cancelled</div>
-                  </div>
-                </div>
-              </div>
+          <div className="filter-controls">
+            <div className="filter-group">
+              <FaFilter className="filter-icon" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
             </div>
-          )}
 
-          {/* Filters and Sorting */}
-          {!ordersLoading && !ordersError && orders.length > 0 && (
-            <div className="filters-section mb-4">
-              <div className="row align-items-center">
-                <div className="col-md-6 mb-2">
-                  <div className="d-flex align-items-center">
-                    <FaFilter className="me-2" />
-                    <label className="me-2">Filter by Status:</label>
-                    <select 
-                      className="form-select form-select-sm"
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                      <option value="all">All Statuses</option>
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="col-md-6 mb-2">
-                  <div className="d-flex align-items-center justify-content-md-end">
-                    <FaSort className="me-2" />
-                    <label className="me-2">Sort by:</label>
-                    <select 
-                      className="form-select form-select-sm"
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                      <option value="total-high">Total: High to Low</option>
-                      <option value="total-low">Total: Low to High</option>
-                      <option value="status">Status</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+            <div className="filter-group">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="filter-select"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="total_high">Total: High to Low</option>
+                <option value="total_low">Total: Low to High</option>
+              </select>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Loading State */}
         {ordersLoading && (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-3">Loading your orders...</p>
-          </div>
-        )}
-
-        {/* Error State */}
-        {ordersError && (
-          <div className="alert alert-danger" role="alert">
-            <strong>Error:</strong> {ordersError}
-            <button 
-              className="btn btn-outline-danger btn-sm ms-3"
-              onClick={refreshOrders}
-            >
-              Try Again
-            </button>
+          <div className="loading-state">
+            <FaSpinner className="spinning" />
+            <p>Loading your orders...</p>
           </div>
         )}
 
         {/* Orders List */}
-        {!ordersLoading && !ordersError && (
-          <div className="orders-content">
+        {!ordersLoading && (
+          <>
             {filteredOrders.length === 0 ? (
-              <div className="text-center py-5">
-                {orders.length === 0 ? (
-                  <>
-                    <FaShoppingBag className="empty-icon mb-3" />
-                    <h3>No Orders Yet</h3>
-                    <p className="text-muted">You haven't placed any orders yet.</p>
-                    <Link to="/products" className="btn btn-primary">
-                      Start Shopping
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <FaFilter className="empty-icon mb-3" />
-                    <h3>No Orders Match Your Filter</h3>
-                    <p className="text-muted">Try adjusting your filters to see more orders.</p>
-                    <button 
-                      className="btn btn-outline-primary"
-                      onClick={() => setStatusFilter('all')}
-                    >
-                      Clear Filters
-                    </button>
-                  </>
+              <div className="no-orders">
+                <FaBox className="no-orders-icon" />
+                <h3>No Orders Found</h3>
+                <p>
+                  {searchTerm || statusFilter !== 'all' 
+                    ? 'No orders match your current filters.' 
+                    : "You haven't placed any orders yet."
+                  }
+                </p>
+                {!searchTerm && statusFilter === 'all' && (
+                  <Link to="/products" className="btn btn-primary">
+                    Start Shopping
+                  </Link>
                 )}
               </div>
             ) : (
-              <div className="row">
+              <div className="orders-list">
                 {filteredOrders.map((order) => (
-                  <div key={order._id} className="col-12 mb-4">
-                    <div className="order-card">
-                      <div className="order-header">
-                        <div className="order-info">
-                          <h5 className="order-id">Order #{order._id.slice(-8).toUpperCase()}</h5>
-                          <p className="order-date">
-                            <FaCalendarAlt className="me-2" />
-                            {formatDate(order.createdAt)}
-                          </p>
-                        </div>
-                        <div className="order-status">
-                          <span className={`status-badge ${getStatusColor(order.status)}`}>
-                            {getStatusIcon(order.status)}
-                            {order.status}
-                          </span>
-                        </div>
+                  <div key={order._id} className="order-card">
+                    {/* Order Header */}
+                    <div className="order-header">
+                      <div className="order-info">
+                        <h3>Order #{order._id}</h3>
+                        <p className="order-date">Placed on {formatDate(order.createdAt)}</p>
+                        <p className="order-items-count">
+                          {getTotalItems(order)} item{getTotalItems(order) !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                      
-                      <div className="order-summary">
-                        <div className="order-items">
-                          <p className="mb-2">
-                            <strong>{order.products.length}</strong> item{order.products.length !== 1 ? 's' : ''}
-                          </p>
-                          <div className="items-preview">
-                            {order.products.slice(0, 3).map((item, index) => (
-                              <span key={index} className="item-name">
-                                {item.product?.name || `Product ${index + 1}`} 
-                                {item.quantity > 1 && ` (x${item.quantity})`}
-                              </span>
-                            ))}
-                            {order.products.length > 3 && (
-                              <span className="more-items">
-                                +{order.products.length - 3} more
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="order-total">
-                          <p className="total-amount">
-                            <FaDollarSign className="me-1" />
-                            {formatPrice(order.total)}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="order-actions">
-                        <button
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={() => handleViewOrder(order)}
+                      <div className="order-status">
+                        <div 
+                          className="status-badge"
+                          style={{ 
+                            backgroundColor: getStatusBgColor(order.status),
+                            color: getStatusColor(order.status)
+                          }}
                         >
-                          <FaEye className="me-2" />
-                          View Details
-                        </button>
+                          {getStatusIcon(order.status)}
+                          <span>{orderStatuses[order.status]?.label || 'Unknown'}</span>
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Order Items Preview */}
+                    <div className="order-items-preview">
+                      <div className="items-grid">
+                        {order.items?.slice(0, 3).map((item, index) => (
+                          <div key={index} className="item-preview">
+                            <img 
+                              src={item.image || 'https://via.placeholder.com/60x60?text=Product'} 
+                              alt={item.name}
+                              className="item-image"
+                            />
+                            <div className="item-info">
+                              <h5>{item.name}</h5>
+                              <p>Qty: {item.quantity}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {order.items?.length > 3 && (
+                          <div className="more-items">
+                            +{order.items.length - 3} more items
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Order Summary */}
+                    <div className="order-summary">
+                      <div className="summary-details">
+                        <div className="summary-row">
+                          <span>Subtotal:</span>
+                          <span>{formatPrice(order.subtotal)}</span>
+                        </div>
+                        <div className="summary-row">
+                          <span>Shipping:</span>
+                          <span>{order.shipping === 0 ? 'Free' : formatPrice(order.shipping)}</span>
+                        </div>
+                        <div className="summary-row">
+                          <span>Tax:</span>
+                          <span>{formatPrice(order.tax)}</span>
+                        </div>
+                        <hr />
+                        <div className="summary-row total">
+                          <span>Total:</span>
+                          <span>{formatPrice(order.total)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Order Actions */}
+                    <div className="order-actions">
+                      <Link 
+                        to={`/order-tracking/${order._id}`}
+                        className="btn btn-outline-primary"
+                      >
+                        <FaEye /> View Details
+                      </Link>
+                      {order.status === 'delivered' && (
+                        <button className="btn btn-outline-secondary">
+                          Reorder
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
-
-      {/* Order Details Modal */}
-      {showOrderDetails && selectedOrder && (
-        <div className="order-details-modal">
-          <div className="modal-overlay" onClick={handleCloseOrderDetails}></div>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Order Details</h3>
-              <button 
-                className="btn-close"
-                onClick={handleCloseOrderDetails}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="modal-body">
-              <div className="order-details-info">
-                <div className="detail-row">
-                  <span className="detail-label">Order ID:</span>
-                  <span className="detail-value">#{selectedOrder._id.slice(-8).toUpperCase()}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Order Date:</span>
-                  <span className="detail-value">{formatDate(selectedOrder.createdAt)}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Status:</span>
-                  <span className={`detail-value status-badge ${getStatusColor(selectedOrder.status)}`}>
-                    {getStatusIcon(selectedOrder.status)}
-                    {selectedOrder.status}
-                  </span>
-                </div>
-                {selectedOrder.updatedAt && selectedOrder.updatedAt !== selectedOrder.createdAt && (
-                  <div className="detail-row">
-                    <span className="detail-label">Last Updated:</span>
-                    <span className="detail-value">{formatDate(selectedOrder.updatedAt)}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="order-items-details">
-                <h4>Order Items</h4>
-                {selectedOrder.products.map((item, index) => (
-                  <div key={index} className="order-item">
-                    <div className="item-info">
-                      <h6>{item.product?.name || `Product ${index + 1}`}</h6>
-                      <p className="item-details">
-                        Quantity: {item.quantity} | Price: {formatPrice(item.price)}
-                      </p>
-                    </div>
-                    <div className="item-total">
-                      {formatPrice(item.price * item.quantity)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="order-total-details">
-                <div className="total-row">
-                  <span className="total-label">Total:</span>
-                  <span className="total-value">{formatPrice(selectedOrder.total)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default Orders; 
+export default Orders;

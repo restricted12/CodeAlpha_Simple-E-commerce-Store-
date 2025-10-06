@@ -65,8 +65,7 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    // For now, just show an alert. You can implement checkout logic later
-    alert('Checkout functionality will be implemented soon!');
+    navigate('/checkout');
   };
 
   const handleContinueShopping = () => {

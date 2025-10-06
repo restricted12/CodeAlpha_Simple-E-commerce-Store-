@@ -1,8 +1,18 @@
 const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader
+  // Support both Authorization: Bearer <token> and x-access-token
+  const authHeader = req.headers['authorization'] || '';
+  const xAccessToken = req.headers['x-access-token'];
+
+  let token = '';
+  if (xAccessToken) {
+    token = xAccessToken;
+  } else if (typeof authHeader === 'string') {
+    token = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : authHeader;
+  }
 
   if (!token) {
     return res.status(401).json({ error: 'Access denied. No token provided.' });
@@ -14,7 +24,7 @@ const auth = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: 'Invalid token.' });
+    return res.status(401).json({ error: 'Invalid token.' });
   }
 };
 
